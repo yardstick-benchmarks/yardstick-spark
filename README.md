@@ -1,2 +1,2 @@
 # yardstick-spark
-Benchamarks for Apache Spark.
+Benchmarks for Apache Spark.

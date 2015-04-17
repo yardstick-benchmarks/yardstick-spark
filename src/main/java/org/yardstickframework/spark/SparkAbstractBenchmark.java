@@ -17,6 +17,9 @@
 
 package org.yardstickframework.spark;
 
+import org.apache.spark.*;
+import org.apache.spark.streaming.*;
+import org.apache.spark.streaming.api.java.*;
 import org.yardstickframework.*;
 
 import static org.yardstickframework.BenchmarkUtils.*;
@@ -28,15 +31,35 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
     /** Arguments. */
     protected final SparkBenchmarkArguments args = new SparkBenchmarkArguments();
 
+    /** Spark node. */
+    private SparkNode node;
+
+    /** Spark streaming context. */
+    protected JavaStreamingContext ssc;
+
+    /** Spark context. */
+    protected SparkConf sc;
+
     /** {@inheritDoc} */
     @Override public void setUp(BenchmarkConfiguration cfg) throws Exception {
         super.setUp(cfg);
 
-        jcommander(cfg.commandLineArguments(), args, "<ignite-driver>");
+        jcommander(cfg.commandLineArguments(), args, "<spark-driver>");
+
+        node = new SparkNode();
+
+        node.start(cfg);
+
+        sc = new SparkConf().setAppName("spark-benchmark").setMaster(node.masterUrl());
+
+        ssc = new JavaStreamingContext(sc, Seconds.apply(1));
     }
 
     /** {@inheritDoc} */
     @Override public void tearDown() throws Exception {
+        ssc.stop(true);
+
+        node.stop();
     }
 
     /** {@inheritDoc} */

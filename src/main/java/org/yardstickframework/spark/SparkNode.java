@@ -19,20 +19,111 @@ package org.yardstickframework.spark;
 
 import org.yardstickframework.*;
 
+import java.util.concurrent.TimeUnit;
+
+import static org.yardstickframework.BenchmarkUtils.jcommander;
+
 /**
- * Standalone spark .
+ * Standalone spark node.
  */
 public class SparkNode implements BenchmarkServer {
+    /** Master url provider. */
+    private S3MasterUrlProvider masterUrlProvider;
+
+    /** Master node. */
+    private SparkMaster master;
+
+    /** Worker node. */
+    private SparkWorker worker;
+
+    /** Url to master node. */
+    private String masterUrl;
+
+    /** Spark benchmark args. */
+    private SparkBenchmarkArguments args;
+
     /** {@inheritDoc} */
     @Override public void start(BenchmarkConfiguration cfg) throws Exception {
+        masterUrlProvider = new S3MasterUrlProvider();
+
+        args = new SparkBenchmarkArguments();
+
+        jcommander(cfg.commandLineArguments(), args, "<spark-node>");
+
+        masterUrl = resolveMasterUrl();
+
+        worker = new SparkWorker();
+
+        System.out.println("Starting worker node.");
+
+        worker.start(masterUrl);
+
+        System.out.println("Worker started.");
+    }
+
+    private String resolveMasterUrl() throws Exception {
+        String masterUrl = masterUrlProvider.getMasterUrl();
+
+        if (masterUrl == null) {
+            // Master node isn't started.
+            try {
+                if (masterUrlProvider.tryLock()) {
+                    masterUrl = masterUrlProvider.getMasterUrl();
+
+                    if (masterUrl == null) {
+                        System.out.println("Starting spark master node.");
+
+                        // Start master node.
+                        master = new SparkMaster();
+
+                        masterUrl = master.start();
+
+                        masterUrlProvider.registerMaster(masterUrl);
+
+                        System.out.println("Master node started.");
+                    }
+                }
+                else {
+                    // Another process starting master node. Waiting.
+                    do {
+                        masterUrl = masterUrlProvider.getMasterUrl();
+
+                        TimeUnit.MILLISECONDS.sleep(500L);
+                    } while (masterUrl != null);
+                }
+            }
+            finally {
+                try {
+                    masterUrlProvider.unLock();
+                }
+                catch (Exception ignore) {
+                }
+            }
+        }
+
+        return masterUrl;
+    }
+
+    /**
+     * @return Url to master node.
+     */
+    public String masterUrl() {
+        return masterUrl;
     }
 
     /** {@inheritDoc} */
     @Override public void stop() throws Exception {
+        if (worker != null)
+            worker.stop();
+
+        if (master != null) {
+            masterUrlProvider.unregisterMaster(master.url());
+            master.stop();
+        }
     }
 
     /** {@inheritDoc} */
     @Override public String usage() {
-        return null;
+        return args.description();
     }
 }

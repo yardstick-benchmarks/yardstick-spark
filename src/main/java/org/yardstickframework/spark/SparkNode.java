@@ -19,7 +19,7 @@ package org.yardstickframework.spark;
 
 import org.yardstickframework.*;
 
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.yardstickframework.BenchmarkUtils.jcommander;
 

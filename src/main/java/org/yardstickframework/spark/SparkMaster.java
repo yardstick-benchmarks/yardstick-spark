@@ -38,7 +38,7 @@ public class SparkMaster {
     public static final String DEFAULT_HOST = "localhost";
 
     /** */
-    public static final int DEFAULT_WEB_UI_PORT = 66666;
+    public static final int DEFAULT_WEB_UI_PORT = 0;
 
     /** */
     private Tuple4<ActorSystem, Object, Object, Option<Object>> startInfo;

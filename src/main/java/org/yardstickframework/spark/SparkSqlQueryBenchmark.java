@@ -23,6 +23,7 @@ import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
 
+import java.text.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -37,6 +38,8 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
     /** Sql context. */
     private SQLContext sqlContext;
+
+    private static final DecimalFormat format = new DecimalFormat("##.##");
 
     /** {@inheritDoc} */
     @Override public void setUp(BenchmarkConfiguration cfg) throws Exception {
@@ -97,7 +100,6 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
      */
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
         return sqlContext.sql("SELECT firstName, salary FROM " + TABLE_NAME + " WHERE salary >= "
-            + String.format(Locale.ENGLISH, "%f", minSalary) + " AND salary <= "
-            + String.format(Locale.ENGLISH, "%f", maxSalary)).collectAsList();
+            + format.format(minSalary) + " AND salary <= " + format.format(maxSalary)).collectAsList();
     }
 }

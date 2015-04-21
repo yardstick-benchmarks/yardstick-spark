@@ -50,6 +50,8 @@ public class SparkNode implements BenchmarkServer {
 
         jcommander(cfg.commandLineArguments(), args, "<spark-node>");
 
+        setLocalIpEnv();
+
         masterUrl = resolveMasterUrl();
 
         worker = new SparkWorker();
@@ -59,6 +61,16 @@ public class SparkNode implements BenchmarkServer {
         worker.start(masterUrl);
 
         System.out.println("Worker started.");
+    }
+
+    /**
+     * Init local ip for spark node.
+     */
+    private void setLocalIpEnv() {
+        String localIp = System.getenv("LOCAL_IP");
+
+        if (localIp != null && !localIp.isEmpty())
+            System.getenv().put("SPARK_LOCAL_IP", localIp);
     }
 
     private String resolveMasterUrl() throws Exception {

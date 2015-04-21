@@ -17,27 +17,22 @@
 
 package org.yardstickframework.spark;
 
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.DataFrame;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SQLContext;
-import org.apache.spark.storage.StorageLevel;
-import org.yardstickframework.BenchmarkConfiguration;
-import org.yardstickframework.spark.model.Person;
+import org.apache.spark.api.java.*;
+import org.apache.spark.sql.*;
+import org.apache.spark.storage.*;
+import org.yardstickframework.*;
+import org.yardstickframework.spark.model.*;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.text.*;
+import java.util.*;
+import java.util.concurrent.*;
 
-import static org.yardstickframework.BenchmarkUtils.println;
+import static org.yardstickframework.BenchmarkUtils.*;
 
 /**
  * Ignite benchmark that performs query operations.
  */
-public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
+public class SparkDSLQueryBenchmark extends SparkAbstractBenchmark {
     /** */
     public static final String TABLE_NAME = "person";
 
@@ -65,17 +60,15 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         JavaRDD<Person> rdds = sc.parallelize(persons);
 
-        if (args.backups())
-            rdds.persist(StorageLevel.MEMORY_ONLY_2());
-        else
-            rdds.persist(StorageLevel.MEMORY_ONLY());
-
         SQLContext sqlContext = new SQLContext(sc);
 
         df = sqlContext.createDataFrame(rdds, Person.class);
         df.registerTempTable(TABLE_NAME);
 
-        sqlContext.cacheTable(TABLE_NAME);
+        if (args.backups())
+            df.persist(StorageLevel.MEMORY_ONLY_2());
+        else
+            df.persist(StorageLevel.MEMORY_ONLY());
 
         println(cfg, "Finished populating query data in " + ((System.nanoTime() - start) / 1_000_000) + " ms.");
     }

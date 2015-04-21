@@ -51,6 +51,13 @@ public class SparkWorker {
     }
 
     /**
+     * Wait termination worker.
+     */
+    public void waitTerminate() {
+        worker._1.awaitTermination();
+    }
+
+    /**
      * Stop node.
      */
     public void stop() {

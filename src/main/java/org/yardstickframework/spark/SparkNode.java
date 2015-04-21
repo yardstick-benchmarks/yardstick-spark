@@ -21,7 +21,7 @@ import org.yardstickframework.*;
 
 import java.util.concurrent.*;
 
-import static org.yardstickframework.BenchmarkUtils.jcommander;
+import static org.yardstickframework.BenchmarkUtils.*;
 
 /**
  * Standalone spark node.
@@ -39,16 +39,18 @@ public class SparkNode implements BenchmarkServer {
     /** Url to master node. */
     private String masterUrl;
 
-    /** Spark benchmark args. */
-    private SparkBenchmarkArguments args;
-
     /** {@inheritDoc} */
     @Override public void start(BenchmarkConfiguration cfg) throws Exception {
+        start(cfg, true);
+    }
+
+    /**
+     * @param cfg Benchmark configuration.
+     * @param wait Wait termination worker.
+     * @throws Exception If failed.
+     */
+    public void start(BenchmarkConfiguration cfg, boolean wait) throws Exception {
         masterUrlProvider = new S3MasterUrlProvider();
-
-        args = new SparkBenchmarkArguments();
-
-        jcommander(cfg.commandLineArguments(), args, "<spark-node>");
 
         setLocalIpEnv();
 
@@ -56,11 +58,14 @@ public class SparkNode implements BenchmarkServer {
 
         worker = new SparkWorker();
 
-        System.out.println("Starting worker node.");
+        println(cfg, "Starting worker node.");
 
         worker.start(masterUrl);
 
-        System.out.println("Worker started.");
+        println(cfg, "Worker started.");
+
+        if (wait)
+            worker.waitTerminate();
     }
 
     /**
@@ -136,6 +141,6 @@ public class SparkNode implements BenchmarkServer {
 
     /** {@inheritDoc} */
     @Override public String usage() {
-        return args.description();
+        return masterUrl();
     }
 }

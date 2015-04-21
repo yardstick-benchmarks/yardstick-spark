@@ -19,6 +19,7 @@ package org.yardstickframework.spark;
 
 import org.apache.spark.api.java.*;
 import org.apache.spark.sql.*;
+import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
 
@@ -31,6 +32,9 @@ import static org.yardstickframework.BenchmarkUtils.*;
  * Ignite benchmark that performs query operations.
  */
 public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
+    /** */
+    public static final String TABLE_NAME = "person";
+
     /** Sql context. */
     private SQLContext sqlContext;
 
@@ -48,15 +52,20 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
             persons.add(new Person(i, "firstName" + i, "lastName" + i, i * 1000));
 
             if (i % 100000 == 0)
-                println(cfg, "Populated persons: " + i);
+               println(cfg, "Populated persons: " + i);
         }
 
         JavaRDD<Person> rdds = sc.parallelize(persons);
 
+        if (args.backups())
+            rdds.persist(StorageLevel.MEMORY_ONLY_2());
+        else
+            rdds.persist(StorageLevel.MEMORY_ONLY());
+
         sqlContext = new SQLContext(sc);
 
         DataFrame dataFrame = sqlContext.createDataFrame(rdds, Person.class);
-        dataFrame.registerTempTable("person");
+        dataFrame.registerTempTable(TABLE_NAME);
 
         println(cfg, "Finished populating query data in " + ((System.nanoTime() - start) / 1_000_000) + " ms.");
     }
@@ -67,7 +76,7 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         double maxSalary = salary + 1000;
 
-        Collection<Row> entries = executeQuery(0, 1000);
+        Collection<Row> entries = executeQuery(salary, maxSalary);
 
         for (Row entry : entries) {
             Double entrySalary = entry.getDouble(1);
@@ -87,7 +96,8 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
      * @throws Exception If failed.
      */
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
-        return sqlContext.sql("SELECT firstName, salary FROM person WHERE salary >= "
-            + minSalary + " AND salary <= " + maxSalary).collectAsList();
+        return sqlContext.sql("SELECT firstName, salary FROM " + TABLE_NAME + " WHERE salary >= "
+            + String.format(Locale.ENGLISH, "%f", minSalary) + " AND salary <= "
+            + String.format(Locale.ENGLISH, "%f", maxSalary)).collectAsList();
     }
 }

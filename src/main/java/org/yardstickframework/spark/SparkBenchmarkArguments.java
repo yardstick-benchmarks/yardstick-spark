@@ -25,7 +25,7 @@ import com.beust.jcommander.*;
 @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
 public class SparkBenchmarkArguments {
     /** */
-    @Parameter(names = {"-b", "--backups"}, description = "Backups")
+    @Parameter(names = {"-b", "--backup"}, description = "Backup")
     private boolean backups;
 
     /** */

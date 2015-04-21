@@ -74,8 +74,8 @@ public class SparkNode implements BenchmarkServer {
     private void setLocalIpEnv() {
         String localIp = System.getenv("LOCAL_IP");
 
-        if (localIp != null && !localIp.isEmpty())
-            System.setProperty("spark.driver.host", localIp);
+        //if (localIp != null && !localIp.isEmpty())
+        //    System.setProperty("spark.driver.host", localIp);
     }
 
     private String resolveMasterUrl() throws Exception {

@@ -70,6 +70,8 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
         DataFrame dataFrame = sqlContext.createDataFrame(rdds, Person.class);
         dataFrame.registerTempTable(TABLE_NAME);
 
+        sqlContext.cacheTable(TABLE_NAME);
+
         println(cfg, "Finished populating query data in " + ((System.nanoTime() - start) / 1_000_000) + " ms.");
     }
 

@@ -66,9 +66,9 @@ public class SparkDSLQueryBenchmark extends SparkAbstractBenchmark {
         df.registerTempTable(TABLE_NAME);
 
         if (args.backups())
-            df.persist(StorageLevel.MEMORY_ONLY_2());
+            df.persist(StorageLevel.MEMORY_AND_DISK_2());
         else
-            df.persist(StorageLevel.MEMORY_ONLY());
+            df.persist(StorageLevel.MEMORY_AND_DISK());
 
         println(cfg, "Finished populating query data in " + ((System.nanoTime() - start) / 1_000_000) + " ms.");
     }

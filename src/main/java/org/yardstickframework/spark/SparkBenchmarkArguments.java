@@ -26,30 +26,11 @@ import com.beust.jcommander.*;
 public class SparkBenchmarkArguments {
     /** */
     @Parameter(names = {"-b", "--backups"}, description = "Backups")
-    private int backups;
-
-    @Parameter(names = {"-cfg", "--Config"}, description = "Configuration file")
-    private String cfg = "config/ignite-localhost-config.xml";
+    private boolean backups;
 
     /** */
     @Parameter(names = {"-r", "--range"}, description = "Key range")
     private int range = 1_000_000;
-
-    /** */
-    @Parameter(names = {"-j", "--jobs"}, description = "Number of jobs for compute benchmarks")
-    private int jobs = 10;
-
-    /** */
-    @Parameter(names = {"-cs", "--cacheStore"}, description = "Enable or disable cache store readThrough, writeThrough")
-    private boolean storeEnabled;
-
-    /** */
-    @Parameter(names = {"-wb", "--writeBehind"}, description = "Enable or disable writeBehind for cache store")
-    private boolean writeBehind;
-
-    /** */
-    @Parameter(names = {"-cn", "--cacheName"}, description = "Cache name")
-    private String cacheName;
 
     /** */
     @Parameter(names = {"-bch", "--batchSize"}, description = "Batch size")
@@ -58,7 +39,7 @@ public class SparkBenchmarkArguments {
     /**
      * @return Backups.
      */
-    public int backups() {
+    public boolean backups() {
         return backups;
     }
 
@@ -67,41 +48,6 @@ public class SparkBenchmarkArguments {
      */
     public int range() {
         return range;
-    }
-
-    /**
-     * @return Configuration file.
-     */
-    public String configuration() {
-        return cfg;
-    }
-
-    /**
-     * @return Number of jobs
-     */
-    public int jobs() {
-        return jobs;
-    }
-
-    /**
-     * @return {@code True} if enabled readThrough, writeThrough for cache.
-     */
-    public boolean isStoreEnabled() {
-        return storeEnabled;
-    }
-
-    /**
-     * @return {@code True} if enabled writeBehind for cache store.
-     */
-    public boolean isWriteBehind() {
-        return writeBehind;
-    }
-
-    /**
-     * @return Cache name.
-     */
-    public String cacheName() {
-        return cacheName;
     }
 
     /**
@@ -115,11 +61,11 @@ public class SparkBenchmarkArguments {
      * @return Description.
      */
     public String description() {
-        return "-cn=" + cacheName + "-b=" + backups;
+        return "-r=" + range + " -b=" + backups + " -bch=" + batchSize;
     }
 
     /** {@inheritDoc} */
     @Override public String toString() {
-        return "TODO";
+        return description();
     }
 }

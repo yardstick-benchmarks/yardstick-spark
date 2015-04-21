@@ -17,29 +17,32 @@
 # limitations under the License.
 #
 
-# Start all spark daemons.
-# Starts the master on this node.
-# Starts a worker on each node specified in conf/slaves
+# This script computes Spark's classpath and prints it to stdout; it's used by both the "run"
+# script and the ExecutorRunner in standalone cluster mode.
 
-sbin="`dirname "$0"`"
-sbin="`cd "$sbin"; pwd`"
+# Figure out where Spark is installed
+FWDIR="$(cd "`dirname "$0"`"/..; pwd)"
 
-TACHYON_STR=""
+function appendToClasspath(){
+  if [ -n "$1" ]; then
+    if [ -n "$CLASSPATH" ]; then
+      CLASSPATH="$CLASSPATH:$1"
+    else
+      CLASSPATH="$1"
+    fi
+  fi
+}
 
-while (( "$#" )); do
-case $1 in
-    --with-tachyon)
-      TACHYON_STR="--with-tachyon"
-      ;;
-  esac
-shift
+if [ -n "$JAVA_HOME" ]; then
+  JAR_CMD="$JAVA_HOME/bin/jar"
+else
+  JAR_CMD="jar"
+fi
+
+num_jars=0
+
+for f in "${FWDIR}"/libs/*.jar; do
+  appendToClasspath "$f"
 done
 
-# Load the Spark configuration
-. "$sbin/spark-config.sh"
-
-# Start Master
-"$sbin"/start-master.sh $TACHYON_STR
-
-# Start Workers
-"$sbin"/start-slaves.sh $TACHYON_STR
+echo "$CLASSPATH"

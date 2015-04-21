@@ -44,16 +44,21 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
 
         node = new SparkNode();
 
-        node.start(cfg);
+        node.start(cfg, false);
 
-        sc = new JavaSparkContext(new SparkConf().setAppName("query").setMaster(node.masterUrl()));
+        sc = new JavaSparkContext(new SparkConf()
+            .setAppName("query")
+            .set("spark.akka.frameSize", "128")
+            .setMaster(node.masterUrl()));
     }
 
     /** {@inheritDoc} */
     @Override public void tearDown() throws Exception {
-        sc.stop();
+        if (sc != null)
+            sc.stop();
 
-        node.stop();
+        if (node != null)
+            node.stop();
     }
 
     /** {@inheritDoc} */

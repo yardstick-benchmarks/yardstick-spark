@@ -32,6 +32,5 @@ The following benchmark properties can be defined in the benchmark configuration
 
 * `-b` or `--backups` - Set storage level `MEMORY_ONLY_2` (replicate each partition on two cluster nodes). By default `MEMORY_ONLY`.
 
-
 ## License
 Yardstick Apache Spark is available under [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) Open Source license.

@@ -35,7 +35,7 @@ public class SparkMaster {
     public static final int DEFAULT_PORT = 55555;
 
     /** */
-    public static final String DEFAULT_HOST = "localhost";
+    public static final String DEFAULT_HOST = System.getenv("SPARK_LOCAL_IP");
 
     /** */
     public static final int DEFAULT_WEB_UI_PORT = 0;

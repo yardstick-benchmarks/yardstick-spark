@@ -52,8 +52,6 @@ public class SparkNode implements BenchmarkServer {
     public void start(BenchmarkConfiguration cfg, boolean wait) throws Exception {
         masterUrlProvider = new S3MasterUrlProvider();
 
-        setLocalIpEnv();
-
         masterUrl = resolveMasterUrl();
 
         worker = new SparkWorker();
@@ -66,16 +64,6 @@ public class SparkNode implements BenchmarkServer {
 
         if (wait)
             worker.waitTerminate();
-    }
-
-    /**
-     * Init local ip for spark node.
-     */
-    private void setLocalIpEnv() {
-        String localIp = System.getenv("LOCAL_IP");
-
-        //if (localIp != null && !localIp.isEmpty())
-        //    System.setProperty("spark.driver.host", localIp);
     }
 
     private String resolveMasterUrl() throws Exception {

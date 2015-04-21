@@ -60,6 +60,12 @@ public class SparkDSLQueryBenchmark extends SparkAbstractBenchmark {
 
         JavaRDD<Person> rdds = sc.parallelize(persons);
 
+        rdds = rdds.repartition(1000);
+
+        rdds.cache();
+
+        println(cfg, "Caching records count = [" + rdds.count() + "]");
+
         SQLContext sqlContext = new SQLContext(sc);
 
         df = sqlContext.createDataFrame(rdds, Person.class);

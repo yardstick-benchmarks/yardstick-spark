@@ -50,7 +50,12 @@ public class SparkMaster {
      * @return Url for master node.
      */
     public String start() {
-        startInfo = Master.startSystemAndActor(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_WEB_UI_PORT, new SparkConf());
+        SparkConf conf = new SparkConf();
+
+        conf.set("spark.executor.memory", "10G");
+        conf.set("spark.shuffle.memoryFraction", "0.6");
+
+        startInfo = Master.startSystemAndActor(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_WEB_UI_PORT, conf);
 
         url = SPARK_URL_PREFIX + "//" + DEFAULT_HOST + ":" + DEFAULT_PORT;
 

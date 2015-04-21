@@ -35,7 +35,12 @@ public class SparkWorker {
      * @param masterUrl Url to master. <i>spark://HOST:PORT</i>
      */
     public void start(String masterUrl) {
-        WorkerArguments args = new WorkerArguments(new String[]{masterUrl}, new SparkConf());
+        SparkConf conf = new SparkConf();
+
+        conf.set("spark.executor.memory", "10G");
+        conf.set("spark.shuffle.memoryFraction", "0.6");
+
+        WorkerArguments args = new WorkerArguments(new String[]{masterUrl}, conf);
 
         worker = Worker.startSystemAndActor(
             args.host(),
@@ -46,7 +51,7 @@ public class SparkWorker {
             args.masters(),
             args.workDir(),
             Option.apply((Object) 1),
-            new SparkConf()
+                conf
         );
     }
 

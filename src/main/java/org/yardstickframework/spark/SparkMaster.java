@@ -22,8 +22,6 @@ import org.apache.spark.*;
 import org.apache.spark.deploy.master.*;
 import scala.*;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Spark master node.
  */

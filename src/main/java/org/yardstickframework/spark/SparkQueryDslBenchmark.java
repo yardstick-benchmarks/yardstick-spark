@@ -32,7 +32,7 @@ import static org.yardstickframework.BenchmarkUtils.*;
 /**
  * Ignite benchmark that performs query operations.
  */
-public class SparkQueryDSLBenchmark extends SparkAbstractBenchmark {
+public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
     /** */
     public static final String TABLE_NAME = "person";
 

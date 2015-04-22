@@ -32,9 +32,12 @@ import static org.yardstickframework.BenchmarkUtils.*;
 /**
  * Ignite benchmark that performs query operations.
  */
-public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
+public class SparkSqlJoinBenchmark extends SparkAbstractBenchmark {
     /** */
-    public static final String TABLE_NAME = "person";
+    public static final String PERSON_TABLE_NAME = "person";
+
+    /** */
+    public static final String ORGANIZATION_TABLE_NAME = "organization";
 
     /** Sql context. */
     private SQLContext sqlContext;
@@ -50,28 +53,46 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         long start = System.nanoTime();
 
+        // Populate organizations.
+        int orgRange = args.range() / 10;
+
+        List<Organization> orgs = new ArrayList<>(orgRange);
+
+        for (int i = 0; i < orgRange; i++)
+            orgs.add(new Organization(i, "org" + i));
+
+        // Populate persons.
         List<Person> persons = new ArrayList<>(args.range());
 
-        for (int i = 0; i < args.range(); i++) {
-            persons.add(new Person(i, "firstName" + i, "lastName" + i, i * 1000));
+        for (int i = 0; i < args.range(); i++)
+            persons.add(new Person(i, nextRandom(orgRange),"firstName" + i, "lastName" + i, i * 1000));
 
-            if (i % 100000 == 0)
-               println(cfg, "Populated persons: " + i);
+        JavaRDD<Person> personRdd = sc.parallelize(persons);
+
+        JavaRDD<Organization> orgsRdd = sc.parallelize(orgs);
+
+        if (args.backups()) {
+            personRdd.persist(StorageLevel.MEMORY_ONLY_2());
+
+            orgsRdd.persist(StorageLevel.MEMORY_ONLY_2());
         }
+        else {
+            personRdd.persist(StorageLevel.MEMORY_ONLY());
 
-        JavaRDD<Person> rdds = sc.parallelize(persons);
-
-        if (args.backups())
-            rdds.persist(StorageLevel.MEMORY_ONLY_2());
-        else
-            rdds.persist(StorageLevel.MEMORY_ONLY());
+            orgsRdd.persist(StorageLevel.MEMORY_ONLY());
+        }
 
         sqlContext = new SQLContext(sc);
 
-        DataFrame dataFrame = sqlContext.createDataFrame(rdds, Person.class);
-        dataFrame.registerTempTable(TABLE_NAME);
+        DataFrame personDataFrame = sqlContext.createDataFrame(personRdd, Person.class);
+        personDataFrame.registerTempTable(PERSON_TABLE_NAME);
 
-        sqlContext.cacheTable(TABLE_NAME);
+        sqlContext.cacheTable(PERSON_TABLE_NAME);
+
+        DataFrame orgDataFrame = sqlContext.createDataFrame(orgsRdd, Organization.class);
+        orgDataFrame.registerTempTable(ORGANIZATION_TABLE_NAME);
+
+        sqlContext.cacheTable(ORGANIZATION_TABLE_NAME);
 
         println(cfg, "Finished populating query data in " + ((System.nanoTime() - start) / 1_000_000) + " ms.");
     }
@@ -84,12 +105,21 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         Collection<Row> entries = executeQuery(salary, maxSalary);
 
-        for (Row entry : entries) {
-            Double entrySalary = entry.getDouble(1);
+        for (Row row : entries) {
+            double sal = row.getDouble(4);
 
-            if (entrySalary < salary || entrySalary > maxSalary)
+            if (sal < salary || sal > maxSalary) {
+                Person p = new Person();
+
+                p.setId(row.getInt(0));
+                p.setOrgId(row.getInt(1));
+                p.setFirstName(row.getString(2));
+                p.setLastName(row.getString(3));
+                p.setSalary(sal);
+
                 throw new Exception("Invalid person retrieved [min=" + salary + ", max=" + maxSalary +
-                        ", person=" + entrySalary + ']');
+                    ", person=" + p + ']');
+            }
         }
 
         return true;
@@ -102,7 +132,11 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
      * @throws Exception If failed.
      */
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
-        return sqlContext.sql("SELECT firstName, salary FROM " + TABLE_NAME + " WHERE salary >= "
-            + format.format(minSalary) + " AND salary <= " + format.format(maxSalary)).collectAsList();
+        return sqlContext.sql("SELECT p.id, p.orgId, p.firstName, p.lastName, p.salary, o.name " +
+            "FROM " + PERSON_TABLE_NAME + " p " +
+            "LEFT JOIN " + ORGANIZATION_TABLE_NAME + " o " +
+            "ON p.id = o.id " +
+            "WHERE salary >= " + format.format(minSalary) + " AND salary <= " + format.format(maxSalary))
+                .collectAsList();
     }
 }

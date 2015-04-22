@@ -21,6 +21,8 @@ import org.apache.spark.*;
 import org.apache.spark.api.java.*;
 import org.yardstickframework.*;
 
+import java.util.concurrent.*;
+
 import static org.yardstickframework.BenchmarkUtils.*;
 
 /**
@@ -64,5 +66,13 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
     /** {@inheritDoc} */
     @Override public String usage() {
         return BenchmarkUtils.usage(args);
+    }
+
+    /**
+     * @param max Key range.
+     * @return Next key.
+     */
+    protected int nextRandom(int max) {
+        return ThreadLocalRandom.current().nextInt(max);
     }
 }

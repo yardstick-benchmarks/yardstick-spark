@@ -26,6 +26,9 @@ public class Person implements Externalizable {
     /** Person ID. */
     private int id;
 
+    /** Person ID. */
+    private int orgId;
+
     /** First name (not-indexed). */
     private String firstName;
 
@@ -52,6 +55,23 @@ public class Person implements Externalizable {
      */
     public Person(int id, String firstName, String lastName, double salary) {
         this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.salary = salary;
+    }
+
+    /**
+     * Constructs person record that is not linked to any organization.
+     *
+     * @param id Person ID.
+     * @param orgId Organization ID.
+     * @param firstName First name.
+     * @param lastName Last name.
+     * @param salary Salary.
+     */
+    public Person(int id, int orgId, String firstName, String lastName, double salary) {
+        this.id = id;
+        this.orgId = orgId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = salary;
@@ -111,6 +131,20 @@ public class Person implements Externalizable {
      */
     public void setSalary(double salary) {
         this.salary = salary;
+    }
+
+    /**
+     * @return Organization ID.
+     */
+    public int getOrgId() {
+        return orgId;
+    }
+
+    /**
+     * @param orgId Organization ID.
+     */
+    public void setOrgId(int orgId) {
+        this.orgId = orgId;
     }
 
     /** {@inheritDoc} */

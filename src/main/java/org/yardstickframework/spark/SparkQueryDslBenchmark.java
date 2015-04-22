@@ -23,7 +23,6 @@ import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
 
-import java.text.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -38,8 +37,6 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
     /** Data frame. */
     private DataFrame df;
-
-    private static final DecimalFormat format = new DecimalFormat("##.##");
 
     /** {@inheritDoc} */
     @Override public void setUp(BenchmarkConfiguration cfg) throws Exception {

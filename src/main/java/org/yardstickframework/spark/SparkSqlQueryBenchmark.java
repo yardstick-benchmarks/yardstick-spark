@@ -61,11 +61,6 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         JavaRDD<Person> rdds = sc.parallelize(persons);
 
-        if (args.backups())
-            rdds.persist(StorageLevel.MEMORY_ONLY_2());
-        else
-            rdds.persist(StorageLevel.MEMORY_ONLY());
-
         sqlContext = new SQLContext(sc);
 
         DataFrame dataFrame = sqlContext.createDataFrame(rdds, Person.class);

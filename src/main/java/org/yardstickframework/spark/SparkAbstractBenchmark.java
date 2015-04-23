@@ -44,16 +44,17 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
 
         jcommander(cfg.commandLineArguments(), args, "<spark-driver>");
 
-        node = new SparkNode();
+        //node = new SparkNode();
 
-        node.start(cfg, false);
+        //node.start(cfg, false);
+        S3MasterUrlProvider urlProvider = new S3MasterUrlProvider();
 
         sc = new JavaSparkContext(new SparkConf()
             .setAppName("query")
             .set("spark.akka.frameSize", "128")
             .set("spark.eventLog.enabled", "true")
             .set("spark.driver.host", System.getenv("LOCAL_IP"))
-            .setMaster(node.masterUrl()));
+            .setMaster(urlProvider.getMasterUrl()));
     }
 
     /** {@inheritDoc} */

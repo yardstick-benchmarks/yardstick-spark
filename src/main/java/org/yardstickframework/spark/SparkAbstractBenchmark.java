@@ -52,6 +52,7 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
             .setAppName("query")
             .set("spark.akka.frameSize", "128")
             .set("spark.eventLog.enabled", "true")
+            .set("spark.driver.host", System.getenv("LOCAL_IP"))
             .setMaster(node.masterUrl()));
     }
 

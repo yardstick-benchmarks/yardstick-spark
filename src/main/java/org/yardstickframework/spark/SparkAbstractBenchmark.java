@@ -21,6 +21,7 @@ import org.apache.spark.*;
 import org.apache.spark.api.java.*;
 import org.yardstickframework.*;
 
+import java.io.*;
 import java.util.concurrent.*;
 
 import static org.yardstickframework.BenchmarkUtils.*;
@@ -45,8 +46,15 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
         jcommander(cfg.commandLineArguments(), args, "<spark-driver>");
 
         //node = new SparkNode();
-
         //node.start(cfg, false);
+        File logFolder = new File("/tmp/spark-events");
+
+        if (!logFolder.exists()) {
+            boolean mkdir = logFolder.mkdir();
+
+            println(cfg, "Log directory created. " + logFolder.getAbsolutePath());
+        }
+
         S3MasterUrlProvider urlProvider = new S3MasterUrlProvider();
 
         sc = new JavaSparkContext(new SparkConf()

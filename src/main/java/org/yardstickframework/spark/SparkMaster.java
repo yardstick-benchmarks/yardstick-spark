@@ -50,6 +50,7 @@ public class SparkMaster {
     public String start() {
         SparkConf conf = new SparkConf();
 
+        conf.set("spark.eventLog.enabled", "true");
         conf.set("spark.executor.memory", "10G");
         conf.set("spark.shuffle.memoryFraction", "0.6");
 

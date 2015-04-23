@@ -39,6 +39,7 @@ public class SparkWorker {
 
         conf.set("spark.executor.memory", "10G");
         conf.set("spark.shuffle.memoryFraction", "0.6");
+        conf.set("spark.eventLog.enabled", "true");
 
         WorkerArguments args = new WorkerArguments(new String[]{masterUrl}, conf);
 

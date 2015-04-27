@@ -75,7 +75,7 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         Collection<Row> entries = executeQuery(salary, maxSalary);
 
-        println(cfg, "Size: " + entries.size());
+        println(cfg, "Size: [" + entries.size() + "]" + "Thread id: [" + Thread.currentThread().getId() + "].");
 
 //        for (Row entry : entries) {
 //            Double entrySalary = entry.getDouble(1);

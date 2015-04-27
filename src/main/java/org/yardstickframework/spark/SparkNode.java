@@ -94,7 +94,8 @@ public class SparkNode implements BenchmarkServer {
                         masterUrl = masterUrlProvider.getMasterUrl();
 
                         TimeUnit.MILLISECONDS.sleep(500L);
-                    } while (masterUrl != null);
+                    }
+                    while (masterUrl == null);
                 }
             }
             finally {

@@ -48,15 +48,6 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         long start = System.nanoTime();
 
-        List<Person> persons = new ArrayList<>(args.range());
-
-        for (int i = 0; i < args.range(); i++) {
-            persons.add(new Person(i, "firstName" + i, "lastName" + i, i * 1000));
-
-            if (i % 100000 == 0)
-               println(cfg, "Populated persons: " + i);
-        }
-
         JavaRDD<PersonLight> rdds = sc.textFile("./config/person.txt").map(new Mapper());
 
         SQLContext sqlContext = new SQLContext(sc);

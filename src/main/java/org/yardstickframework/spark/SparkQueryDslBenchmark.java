@@ -61,7 +61,12 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         df = sqlContext.createDataFrame(rdds, Person.class);
         df.registerTempTable(TABLE_NAME);
-        df = df.repartition(3).cache();
+        df = df.repartition(3);
+
+        if (args.backups())
+            df.persist(StorageLevel.MEMORY_ONLY_2());
+        else
+            df.persist(StorageLevel.MEMORY_ONLY());
 
         println(cfg, "Entity count: " + df.count());
         println(cfg, "Finished populating query data in " + ((System.nanoTime() - start) / 1_000_000) + " ms.");
@@ -75,15 +80,13 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         Collection<Row> entries = executeQuery(salary, maxSalary);
 
-        println(cfg, "Size: [" + entries.size() + "]" + "Thread id: [" + Thread.currentThread().getId() + "].");
+        for (Row entry : entries) {
+            Double entrySalary = entry.getDouble(1);
 
-//        for (Row entry : entries) {
-//            Double entrySalary = entry.getDouble(1);
-//
-//            if (entrySalary < salary || entrySalary > maxSalary)
-//                throw new Exception("Invalid person retrieved [min=" + salary + ", max=" + maxSalary +
-//                        ", person=" + entrySalary + ']');
-//        }
+            if (entrySalary < salary || entrySalary > maxSalary)
+                throw new Exception("Invalid person retrieved [min=" + salary + ", max=" + maxSalary +
+                        ", person=" + entrySalary + ']');
+        }
 
         return true;
     }
@@ -95,6 +98,7 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
      * @throws Exception If failed.
      */
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
-        return df.filter(df.col("salary").gt(minSalary)).collectAsList();
+        return df.filter(df.col("salary").gt(minSalary).and(df.col("salary").lt(maxSalary)))
+            .select("firstName", "salary").collectAsList();
     }
 }

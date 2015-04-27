@@ -50,20 +50,20 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         long start = System.nanoTime();
 
-        List<Person> persons = new ArrayList<>(args.range());
+        List<PersonLight> persons = new ArrayList<>(args.range());
 
         for (int i = 0; i < args.range(); i++) {
-            persons.add(new Person(i, "firstName" + i, "lastName" + i, i * 1000));
+            persons.add(new PersonLight(i, i * 1000));
 
             if (i % 100000 == 0)
                println(cfg, "Populated persons: " + i);
         }
 
-        JavaRDD<Person> rdds = sc.parallelize(persons);
+        JavaRDD<PersonLight> rdds = sc.parallelize(persons);
 
         sqlContext = new SQLContext(sc);
 
-        DataFrame dataFrame = sqlContext.createDataFrame(rdds, Person.class);
+        DataFrame dataFrame = sqlContext.createDataFrame(rdds, PersonLight.class);
 
         dataFrame.repartition(3);
 
@@ -103,7 +103,7 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
      * @throws Exception If failed.
      */
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
-        return sqlContext.sql("SELECT firstName, salary FROM " + TABLE_NAME + " WHERE salary >= "
+        return sqlContext.sql("SELECT id, salary FROM " + TABLE_NAME + " WHERE salary >= "
             + format.format(minSalary) + " AND salary <= " + format.format(maxSalary)).collectAsList();
     }
 }

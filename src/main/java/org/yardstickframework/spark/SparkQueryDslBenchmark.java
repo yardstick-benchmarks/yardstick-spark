@@ -18,11 +18,13 @@
 package org.yardstickframework.spark;
 
 import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -55,7 +57,7 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
                println(cfg, "Populated persons: " + i);
         }
 
-        JavaRDD<Person> rdds = sc.parallelize(persons);
+        JavaRDD<PersonLight> rdds = sc.textFile("./config/person.txt").map(new Mapper());
 
         SQLContext sqlContext = new SQLContext(sc);
 
@@ -100,5 +102,21 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
         return df.filter(df.col("salary").gt(minSalary).and(df.col("salary").lt(maxSalary)))
             .select("firstName", "salary").collectAsList();
+    }
+
+    public static class Mapper implements Function<String, PersonLight>, Externalizable {
+        @Override public PersonLight call(String input) throws Exception {
+            String[] split = input.split(" ");
+
+            return new PersonLight(Integer.valueOf(split[0]), Double.valueOf(split[1]));
+        }
+
+        /** {@inheritDoc} */
+        @Override public void writeExternal(ObjectOutput out) throws IOException {
+        }
+
+        /** {@inheritDoc} */
+        @Override public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        }
     }
 }

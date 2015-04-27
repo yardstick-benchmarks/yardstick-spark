@@ -85,15 +85,15 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         double maxSalary = salary + 1000;
 
-        /*Collection<Row> entries = */executeQuery(salary, maxSalary);
+        Collection<Row> entries = executeQuery(salary, maxSalary);
 
-//        for (Row entry : entries) {
-//            Double entrySalary = entry.getDouble(1);
-//
-//            if (entrySalary < salary || entrySalary > maxSalary)
-//                throw new Exception("Invalid person retrieved [min=" + salary + ", max=" + maxSalary +
-//                        ", person=" + entrySalary + ']');
-//        }
+        for (Row entry : entries) {
+            Double entrySalary = entry.getDouble(1);
+
+            if (entrySalary < salary || entrySalary > maxSalary)
+                throw new Exception("Invalid person retrieved [min=" + salary + ", max=" + maxSalary +
+                        ", person=" + entrySalary + ']');
+        }
 
         return true;
     }
@@ -104,10 +104,9 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
      * @return Query result.
      * @throws Exception If failed.
      */
-    private void executeQuery(double minSalary, double maxSalary) throws Exception {
-        sqlContext.sql("SELECT id, salary FROM " + TABLE_NAME + " WHERE salary >= "
-            + format.format(minSalary) + " AND salary <= " + format.format(maxSalary))
-                .save("./test/res.txt", SaveMode.Append);
+    private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
+        return sqlContext.sql("SELECT id, salary FROM " + TABLE_NAME + " WHERE salary >= "
+            + format.format(minSalary) + " AND salary <= " + format.format(maxSalary)).collectAsList();
     }
 
     public static class Mapper implements Function<String, PersonLight>, Externalizable {

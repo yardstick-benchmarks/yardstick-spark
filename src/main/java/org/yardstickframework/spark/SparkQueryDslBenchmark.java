@@ -92,7 +92,7 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
      */
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
         return df.filter(df.col("salary").gt(minSalary).and(df.col("salary").lt(maxSalary)))
-            .select("firstName", "salary").collectAsList();
+            .select("id", "salary").collectAsList();
     }
 
     public static class Mapper implements Function<String, PersonLight>, Externalizable {

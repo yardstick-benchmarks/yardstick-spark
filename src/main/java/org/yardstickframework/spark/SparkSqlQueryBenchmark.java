@@ -18,15 +18,13 @@
 package org.yardstickframework.spark;
 
 import org.apache.spark.api.java.*;
-import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.text.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -63,14 +61,7 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
                println(cfg, "Populated persons: " + i);
         }
 
-        JavaRDD<PersonLight> rdds = sc.textFile("file:///./config/person.txt").map(new Function<String, PersonLight>() {
-            @Override
-            public PersonLight call(String input) throws Exception {
-                String[] split = input.split(" ");
-
-                return new PersonLight(Integer.valueOf(split[0]), Double.valueOf(split[1]));
-            }
-        });
+        JavaRDD<PersonLight> rdds = sc.textFile("file:///./config/person.txt").map(new Mapper());
 
         sqlContext = new SQLContext(sc);
 
@@ -117,5 +108,21 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
         sqlContext.sql("SELECT id, salary FROM " + TABLE_NAME + " WHERE salary >= "
             + format.format(minSalary) + " AND salary <= " + format.format(maxSalary))
                 .save("./test/res.txt", SaveMode.Append);
+    }
+
+    public static class Mapper implements Function<String, PersonLight>, Externalizable {
+        @Override public PersonLight call(String input) throws Exception {
+            String[] split = input.split(" ");
+
+            return new PersonLight(Integer.valueOf(split[0]), Double.valueOf(split[1]));
+        }
+
+        /** {@inheritDoc} */
+        @Override public void writeExternal(ObjectOutput out) throws IOException {
+        }
+
+        /** {@inheritDoc} */
+        @Override public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        }
     }
 }

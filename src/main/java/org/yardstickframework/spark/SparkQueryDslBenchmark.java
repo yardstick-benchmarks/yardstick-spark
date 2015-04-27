@@ -52,7 +52,7 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         SQLContext sqlContext = new SQLContext(sc);
 
-        df = sqlContext.createDataFrame(rdds, Person.class);
+        df = sqlContext.createDataFrame(rdds, PersonLight.class);
         df.registerTempTable(TABLE_NAME);
         df = df.repartition(3);
 

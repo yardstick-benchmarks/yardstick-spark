@@ -61,7 +61,7 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
                println(cfg, "Populated persons: " + i);
         }
 
-        JavaRDD<PersonLight> rdds = sc.textFile("file:///./config/person.txt").map(new Mapper());
+        JavaRDD<PersonLight> rdds = sc.textFile("./config/person.txt").map(new Mapper());
 
         sqlContext = new SQLContext(sc);
 

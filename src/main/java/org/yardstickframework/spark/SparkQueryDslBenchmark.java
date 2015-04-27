@@ -61,8 +61,7 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         df = sqlContext.createDataFrame(rdds, Person.class);
         df.registerTempTable(TABLE_NAME);
-        df.cache();
-        df.repartition(1000);
+        df = df.repartition(3).cache();
 
         println(cfg, "Entity count: " + df.count());
         println(cfg, "Finished populating query data in " + ((System.nanoTime() - start) / 1_000_000) + " ms.");

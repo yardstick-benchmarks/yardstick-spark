@@ -18,11 +18,15 @@
 package org.yardstickframework.spark;
 
 import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.*;
 import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -59,7 +63,14 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
                println(cfg, "Populated persons: " + i);
         }
 
-        JavaRDD<PersonLight> rdds = sc.parallelize(persons);
+        JavaRDD<PersonLight> rdds = sc.textFile("file:///./config/person.txt").map(new Function<String, PersonLight>() {
+            @Override
+            public PersonLight call(String input) throws Exception {
+                String[] split = input.split(" ");
+
+                return new PersonLight(Integer.valueOf(split[0]), Double.valueOf(split[1]));
+            }
+        });
 
         sqlContext = new SQLContext(sc);
 
@@ -83,15 +94,15 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         double maxSalary = salary + 1000;
 
-        Collection<Row> entries = executeQuery(salary, maxSalary);
+        /*Collection<Row> entries = */executeQuery(salary, maxSalary);
 
-        for (Row entry : entries) {
-            Double entrySalary = entry.getDouble(1);
-
-            if (entrySalary < salary || entrySalary > maxSalary)
-                throw new Exception("Invalid person retrieved [min=" + salary + ", max=" + maxSalary +
-                        ", person=" + entrySalary + ']');
-        }
+//        for (Row entry : entries) {
+//            Double entrySalary = entry.getDouble(1);
+//
+//            if (entrySalary < salary || entrySalary > maxSalary)
+//                throw new Exception("Invalid person retrieved [min=" + salary + ", max=" + maxSalary +
+//                        ", person=" + entrySalary + ']');
+//        }
 
         return true;
     }
@@ -102,8 +113,9 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
      * @return Query result.
      * @throws Exception If failed.
      */
-    private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
-        return sqlContext.sql("SELECT id, salary FROM " + TABLE_NAME + " WHERE salary >= "
-            + format.format(minSalary) + " AND salary <= " + format.format(maxSalary)).collectAsList();
+    private void executeQuery(double minSalary, double maxSalary) throws Exception {
+        sqlContext.sql("SELECT id, salary FROM " + TABLE_NAME + " WHERE salary >= "
+            + format.format(minSalary) + " AND salary <= " + format.format(maxSalary))
+                .save("./test/res.txt", SaveMode.Append);
     }
 }

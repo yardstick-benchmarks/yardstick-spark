@@ -54,7 +54,7 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         df = sqlContext.createDataFrame(sc.parallelize(persons), PersonLight.class);
         df.registerTempTable(TABLE_NAME);
-        df = df.repartition(3);
+        df = df.repartition(100);
 
         if (args.backups())
             df.persist(StorageLevel.MEMORY_ONLY_2());

@@ -55,14 +55,12 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
             println(cfg, "Log directory created. " + logFolder.getAbsolutePath());
         }
 
-        S3MasterUrlProvider urlProvider = new S3MasterUrlProvider();
-
         sc = new JavaSparkContext(new SparkConf()
             .setAppName("query")
             .set("spark.akka.frameSize", "128")
             .set("spark.eventLog.enabled", "true")
             .set("spark.driver.host", System.getenv("LOCAL_IP"))
-            .setMaster(urlProvider.getMasterUrl()));
+            .setMaster("spark://ec2-52-6-62-26.compute-1.amazonaws.com:7077"));
     }
 
     /** {@inheritDoc} */

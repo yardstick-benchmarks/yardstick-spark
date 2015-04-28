@@ -17,14 +17,11 @@
 
 package org.yardstickframework.spark;
 
-import org.apache.spark.api.java.*;
-import org.apache.spark.api.java.function.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -48,11 +45,14 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
 
         long start = System.nanoTime();
 
-        JavaRDD<PersonLight> rdds = sc.textFile("./config/person.txt").map(new Mapper());
+        List<PersonLight> persons = new ArrayList<>(args.range());
+
+        for (int i = 0; i < args.range(); i++)
+            persons.add(new PersonLight(i, i * 1000));
 
         SQLContext sqlContext = new SQLContext(sc);
 
-        df = sqlContext.createDataFrame(rdds, PersonLight.class);
+        df = sqlContext.createDataFrame(sc.parallelize(persons), PersonLight.class);
         df.registerTempTable(TABLE_NAME);
         df = df.repartition(3);
 
@@ -93,21 +93,5 @@ public class SparkQueryDslBenchmark extends SparkAbstractBenchmark {
     private Collection<Row> executeQuery(double minSalary, double maxSalary) throws Exception {
         return df.filter(df.col("salary").gt(minSalary).and(df.col("salary").lt(maxSalary)))
             .select("id", "salary").collectAsList();
-    }
-
-    public static class Mapper implements Function<String, PersonLight>, Externalizable {
-        @Override public PersonLight call(String input) throws Exception {
-            String[] split = input.split(" ");
-
-            return new PersonLight(Integer.valueOf(split[0]), Double.valueOf(split[1]));
-        }
-
-        /** {@inheritDoc} */
-        @Override public void writeExternal(ObjectOutput out) throws IOException {
-        }
-
-        /** {@inheritDoc} */
-        @Override public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        }
     }
 }

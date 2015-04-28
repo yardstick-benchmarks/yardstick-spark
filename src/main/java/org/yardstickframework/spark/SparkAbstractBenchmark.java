@@ -61,7 +61,7 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
             .set("spark.eventLog.enabled", "true")
             .set("spark.driver.host", System.getenv("LOCAL_IP"))
             .setJars(new String[]{"libs/spark-yardstick-0.1.0.jar"})
-            .setMaster("spark://ec2-52-6-62-26.compute-1.amazonaws.com:7077"));
+            .setMaster("spark://ec2-52-6-184-168.compute-1.amazonaws.com:7077"));
     }
 
     /** {@inheritDoc} */

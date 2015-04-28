@@ -60,7 +60,7 @@ public abstract class SparkAbstractBenchmark extends BenchmarkDriverAdapter {
             .set("spark.akka.frameSize", "128")
             .set("spark.eventLog.enabled", "true")
             .set("spark.driver.host", System.getenv("LOCAL_IP"))
-            .setMaster("spark://ec2-52-6-62-26.compute-1.amazonaws.com:7077"));
+            .setMaster("spark://52.6.62.26:7077"));
     }
 
     /** {@inheritDoc} */

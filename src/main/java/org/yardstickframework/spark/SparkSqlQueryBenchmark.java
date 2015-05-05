@@ -19,6 +19,7 @@ package org.yardstickframework.spark;
 
 import org.apache.spark.api.java.*;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.hive.*;
 import org.apache.spark.storage.*;
 import org.yardstickframework.*;
 import org.yardstickframework.spark.model.*;
@@ -37,7 +38,7 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
     public static final String TABLE_NAME = "person";
 
     /** Sql context. */
-    private SQLContext sqlContext;
+    private HiveContext sqlContext;
 
     /** */
     private static final DecimalFormat format = new DecimalFormat("##.##");
@@ -61,7 +62,7 @@ public class SparkSqlQueryBenchmark extends SparkAbstractBenchmark {
 
         JavaRDD<Person> rdds = sc.parallelize(persons);
 
-        sqlContext = new SQLContext(sc);
+        sqlContext = new HiveContext(sc.sc());
 
         DataFrame dataFrame = sqlContext.createDataFrame(rdds, Person.class);
 
